@@ -40,6 +40,6 @@ void cargarStopwords(const std::string& nombreArchivo, std::set<std::string>& st
 
 // para chequear si una palabra es stopword o no
 bool esStopword(const std::string& palabra, const std::set<std::string>& stopwords) {
-    // usamos find() del set, que es super rapido. si no lo encuentra, devuelve stopwords.end()
+    // usamos find() del set. si no lo encuentra devuelve stopwords.end()
     return stopwords.find(palabra) != stopwords.end();
 }
