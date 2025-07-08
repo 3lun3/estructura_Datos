@@ -3,67 +3,76 @@
 #include <vector>
 #include <algorithm>
 
-// Inicializa el índice vacío
+// para dejar el indice vacio al principio
 void inicializarIndice(IndiceInvertido& indice) {
     indice.inicio = nullptr;
 }
 
-// Inserta un documento en la lista asociada a un término
-// Si ya existe, aumenta la frecuencia; si no, lo crea
+// funcion para meter un documento en la lista de un termino (posting list)
 void insertarDocumento(NodoDoc*& lista, int idDocumento) {
+    // recorre la lista de documentos de ese termino
     NodoDoc* actual = lista;
     while (actual != nullptr) {
+        // si ya estaba el doc, solo le suma uno a la frecuencia y listo
         if (actual->idDocumento == idDocumento) {
-            actual->frecuencia += 1; // Documento ya existe entonces aumenta frecuencia
+            actual->frecuencia += 1;
             return;
         }
         actual = actual->siguiente;
     }
 
-    // Documento no estaba entonces crea nuevo nodo con frecuencia 1
+    // si no estaba, creamos un nodo nuevo para el doc
     NodoDoc* nuevo = new NodoDoc;
     nuevo->idDocumento = idDocumento;
-    nuevo->frecuencia = 1;
+    nuevo->frecuencia = 1; //la primera vez que aparece, frecuencia 1
+    // y lo ponemos al principio de la lista
     nuevo->siguiente = lista;
     lista = nuevo;
 }
 
-// Inserta un término en el índice, o actualiza si ya existe
+// aqui insertamos un termino en el indice
 void insertarTermino(IndiceInvertido& indice, const std::string& termino, int idDocumento) {
+    // recorremos la lista principal de terminos para ver si ya existe
     NodoTermino* actual = indice.inicio;
     while (actual != nullptr) {
+        // si ya existe el termino
         if (actual->termino == termino) {
-            insertarDocumento(actual->listaDocumentos, idDocumento); // Agrega o actualiza documento
+            // solo llamamos a insertarDocumento para que agregue el doc a su lista
+            insertarDocumento(actual->listaDocumentos, idDocumento);
             return;
         }
         actual = actual->siguiente;
     }
 
-    // Si no existe el término, lo crea
+    // si no existe el termino lo creamos
     NodoTermino* nuevoTermino = new NodoTermino;
     nuevoTermino->termino = termino;
-    nuevoTermino->listaDocumentos = nullptr;
+    nuevoTermino->listaDocumentos = nullptr; // su lista de docs empieza vacia
+    // lo ponemos al principio de la lista de terminos
     nuevoTermino->siguiente = indice.inicio;
     indice.inicio = nuevoTermino;
 
+    // y le agregamos el documento a su nueva lista
     insertarDocumento(nuevoTermino->listaDocumentos, idDocumento);
 }
 
-// Busca un término en el índice
+// una funcion simple para buscar una palabra en el indice
 NodoTermino* buscarTermino(IndiceInvertido& indice, const std::string& termino) {
     NodoTermino* actual = indice.inicio;
     while (actual != nullptr) {
+        // si la encontramos devolvemos el puntero al nodo si no, null
         if (actual->termino == termino) return actual;
         actual = actual->siguiente;
     }
     return nullptr;
 }
 
-// Muestra el índice mostrando la frecuencia de cada término en los documentos
+// funcion para imprimir el indice mostrando la frecuencia de cada palabra en cada doc
+// para debuggear mas que nada
 void mostrarIndiceConFrecuencia(const IndiceInvertido& indice) {
     NodoTermino* actual = indice.inicio;
     while (actual != nullptr) {
-        std::cout << actual->termino << " → ";
+        std::cout << actual->termino << " -> ";
         NodoDoc* doc = actual->listaDocumentos;
         while (doc != nullptr) {
             std::cout << "[doc" << doc->idDocumento << ": " << doc->frecuencia << "] ";
@@ -74,27 +83,28 @@ void mostrarIndiceConFrecuencia(const IndiceInvertido& indice) {
     }
 }
 
-// Muestra el índice usando compresión por diferencia entre IDs
+// otra forma de mostrar el indice usando compresion por diferencia
 void mostrarIndiceConIDsComprimidos(const IndiceInvertido& indice) {
     NodoTermino* actual = indice.inicio;
     while (actual != nullptr) {
-        std::cout << actual->termino << " → ";
+        std::cout << actual->termino << " -> ";
         std::vector<int> ids;
 
-        // Recolectar todos los IDs
+        // juntamos todos los ids en un vector para poder ordenarlos
         NodoDoc* doc = actual->listaDocumentos;
         while (doc != nullptr) {
             ids.push_back(doc->idDocumento);
             doc = doc->siguiente;
         }
 
-        // Ordenar para aplicar compresión por diferencia
+        // los ordenamos de menor a mayor
         std::sort(ids.begin(), ids.end());
 
         if (!ids.empty()) {
-            std::cout << "[" << ids[0]; // Primer ID
+            std::cout << "[" << ids[0]; // imprimimos el primer id
+            // y despues solo imprimimos la diferencia con el anterior. para ahorrar espacio
             for (size_t i = 1; i < ids.size(); ++i) {
-                std::cout << ",+" << (ids[i] - ids[i - 1]); // Diferencia con anterior
+                std::cout << ",+" << (ids[i] - ids[i - 1]);
             }
             std::cout << "]";
         }
@@ -104,21 +114,24 @@ void mostrarIndiceConIDsComprimidos(const IndiceInvertido& indice) {
     }
 }
 
-// Libera toda la memoria dinámica usada por el índice
+// funcion importantisima para liberar toda la memoria del indice
 void liberarIndice(IndiceInvertido& indice) {
+    // recorremos cada termino
     NodoTermino* actual = indice.inicio;
     while (actual != nullptr) {
+        // y para cada termino, recorremos su lista de documentos y los borramos uno por uno
         NodoDoc* doc = actual->listaDocumentos;
         while (doc != nullptr) {
             NodoDoc* tempDoc = doc;
             doc = doc->siguiente;
             delete tempDoc;
         }
+        
+        // una vez borrada la lista de docs, borramos el nodo del termino
         NodoTermino* tempTerm = actual;
         actual = actual->siguiente;
         delete tempTerm;
     }
+    // al final, el indice queda vacio
     indice.inicio = nullptr;
 }
-
-
