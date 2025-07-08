@@ -1,28 +1,29 @@
 #ifndef GRAFO_H
 #define GRAFO_H
 
+// para que no se incluya dos veces y de error de compilacion
+
+// La estructura principal del grafo, aqui guardamos todo
 struct Grafo {
-    int numNodos;           // Cantidad de nodos actuales
-    int* ids;               // IDs de los documentos
-    double* pageRank;       // Valores de PageRank para cada nodo
-    int** adyacencia;       // Matriz de adyacencia (grafo no dirigido)
-    int numAristas;         // Contador de aristas reales
+    int numNodos;           // cuantos nodos tenemos ahora mismo
+    int* ids;               // el array que guarda los IDs de los docs
+    double* pageRank;       // el array para los puntajes de pagerank
+    int** adyacencia;       // la matriz para ver que nodo se conecta con que nodo
+    int numAristas;         // para contar cuantas aristas hay en el grafo
 };
 
-// Inicializa el grafo con un número máximo de nodos
+
+
+// para preparar el grafo
 void inicializarGrafo(Grafo& grafo, int maxNodos);
 
-// Agrega una arista entre dos nodos, si no existe
+// para conectar dos nodos
 void agregarArista(Grafo& grafo, int id1, int id2);
 
-// Calcula PageRank y retorna la cantidad de iteraciones hasta convergencia o maxIter
+// la funcion del pagerank devuelve las iteraciones que tomo
 int calcularPageRank(Grafo& grafo, int maxIter, double damping);
 
-// Libera la memoria del grafo
+// para borrar todo al final y que no queden memory leaks
 void liberarGrafo(Grafo& grafo);
 
-#endif
-
-
-
-
+#endif // GRAFO_H
