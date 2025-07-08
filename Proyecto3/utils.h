@@ -4,16 +4,18 @@
 #include <string>
 #include <set>
 
-// Convierte una palabra a minúsculas
+// include guard para que no se incluya mil veces
+
+// para pasar a minuscula
 std::string aMinuscula(const std::string& palabra);
 
-// Limpia una palabra eliminando signos y dejando solo letras
+// para quitarle la basura a las palabras (puntos, comas, etc)
 std::string limpiarPalabra(const std::string& palabra);
 
-// Carga las stopwords desde un archivo en un set
+// para leer el archivo de stopwords
 void cargarStopwords(const std::string& nombreArchivo, std::set<std::string>& stopwords);
 
-// Verifica si una palabra está en el set de stopwords
+// para ver si una palabra es stopword
 bool esStopword(const std::string& palabra, const std::set<std::string>& stopwords);
 
-#endif
+#endif // UTILS_H
